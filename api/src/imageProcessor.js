@@ -1,6 +1,6 @@
 const path = require("path");
 const wt = require("worker_threads");
-const isMainThread = wt.isMainThread;
+const {Worker, isMainThread} = require('worker_threads');
 const pathToResizeWorker = path.resolve(__dirname, 'resizeWorker.js');
 const pathToMonochromeWorker = path.resolve(__dirname, 'monochromeWorker.js');
 module.exports = imageProcessor;
@@ -18,8 +18,9 @@ function imageProcessor(filename){
             reject(new Error("not on main thread"));
         }
         try{
-            console.log(sourcePath);
-            const resizeWorker = new Worker(pathToResizeWorker, {"workerData": {"source": sourcePath, "destination": resizedDestination}});
+            const resizeWorker = new Worker(pathToResizeWorker, {
+                "workerData": {"source": sourcePath, "destination": resizedDestination}
+            });
             const monochromeWorker = new Worker(pathToMonochromeWorker, {"workerData": {"source": sourcePath, "destination": monochromeDestination}});
             resizeWorker.on('message', function(message){
                 resizeWorkerFinished = true;
