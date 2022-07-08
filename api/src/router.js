@@ -7,13 +7,19 @@ const multer = require('multer');
 const storage = multer.diskStorage({'destination': 'api/uploads/', 'filename': filename});
 const upload = multer({"fileFilter": fileFilter, "storage": storage});
 const photoPath = path.resolve(__dirname, "../../client/photo-viewer.html");
-
+const imageProcessor = require('./imageProcessor');
 
 router.get('/photo-viewer', function(request, response){
     response.sendFile(photoPath);
 })
 
-router.post('/upload', upload.single('photo'), function(request, response){
+router.post('/upload', upload.single('photo'), async function(request, response){
+    try{
+        await imageProcessor(request.file.filename);
+    }catch(e){
+
+    }
+
     if(request.fileValidationError){
         return response.status(400).json({"error": request.fileValidationError});
     }
